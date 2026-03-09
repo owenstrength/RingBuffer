@@ -9,8 +9,8 @@ int main() {
 
     const uint32_t items = 1000;
 
-    std::thread producer(busy_producer<RingBuffer>, std::ref(queue), items);
-    std::thread consumer(busy_consumer<RingBuffer>, std::ref(queue), items);
+    std::thread producer(busy_producer, std::ref(queue), items);
+    std::thread consumer(busy_consumer, std::ref(queue), items);
 
     producer.join();
     consumer.join();

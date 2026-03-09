@@ -3,13 +3,13 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <new>
-#include <memory>
-
 
 struct RingBuffer {
+    const bool prefetch_enabled;
     static constexpr size_t CACHE_LINE_SIZE = 64;
     static constexpr uint32_t BUFFER_SIZE = 4096;
+
+    explicit RingBuffer(bool prefetch = false) : prefetch_enabled(prefetch) {}
 
     // ensure buffer size is a power of 2
     static_assert(BUFFER_SIZE > 1 && (BUFFER_SIZE & (BUFFER_SIZE - 1)) == 0);
@@ -30,8 +30,8 @@ struct RingBuffer {
     }
 
     bool full() const {
-        uint32_t next = (head.load(std::memory_order_acquire) + 1) % BUFFER_SIZE;
-        return next == tail.load(std::memory_order_acquire);
+        return head.load(std::memory_order_acquire) -
+               tail.load(std::memory_order_acquire) == BUFFER_SIZE;
     }
 
     bool push(uint32_t value) {
@@ -52,7 +52,8 @@ struct RingBuffer {
             return false;
 
         value = buffer[t & BUFFER_MASK];
-        __builtin_prefetch(&buffer[(t + 4) & BUFFER_MASK]); // prefetch next items
+        if (prefetch_enabled)
+            __builtin_prefetch(&buffer[(t + 64) & BUFFER_MASK]);
 
         t += 1;
         tail.store(t, std::memory_order_release);
