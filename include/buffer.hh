@@ -53,7 +53,7 @@ struct RingBuffer {
 
         value = buffer[t & BUFFER_MASK];
         if (prefetch_enabled)
-            __builtin_prefetch(&buffer[(t + 64) & BUFFER_MASK]);
+            __builtin_prefetch(&buffer[(t + 256) & BUFFER_MASK]);
 
         t += 1;
         tail.store(t, std::memory_order_release);
