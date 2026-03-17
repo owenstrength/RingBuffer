@@ -1,4 +1,4 @@
-# Single Producer Single Consumer Queue (RingBuffer)
+# Single Producer Single Consumer Queue (Ring Buffer)
 
 A simple single-producer/single-consumer (SPSC) lock-free ring buffer in C++ with a Google Benchmark harness.
 
